@@ -1,0 +1,10 @@
+node_modules/
+.env
+.DS_Store
+
+# Generated News-Recom training export (may contain user behavior)
+exports/interactions.csv
+# News-Recom batch outputs (may contain user ids / scores)
+exports/recommendations.csv
+*.log
+npm-debug.log*
