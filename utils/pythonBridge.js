@@ -1,16 +1,11 @@
 /**
- * Python Integration Utility (Placeholder for DeepCARSKit)
+ * Python / ML integration helpers.
  *
- * This module will communicate with your Python Deep Learning
- * recommendation service once it is built.
- *
- * Expected flow:
- * 1. Node.js sends user context (history, bookmarks, categories) to Python API
- * 2. DeepCARSKit returns ranked article IDs / scores
- * 3. Node.js fetches article details and returns to React frontend
+ * Candidate generation stays in News-Recom CSV + category fallback.
+ * Final ordering for CSV candidates is delegated to utils/deepRanker.js.
  */
 
-// const PYTHON_URL = process.env.PYTHON_RECOMMENDER_URL;
+const { checkDeepRankerHealth } = require('./deepRanker');
 
 /**
  * Build user context payload for the recommendation engine
@@ -64,14 +59,10 @@ const fetchRecommendationsFromPython = async (user) => {
 };
 
 /**
- * Health check for Python recommendation service (PLACEHOLDER)
+ * Health check for the Flask deep ranker (GET /health).
  */
 const checkPythonServiceHealth = async () => {
-  // TODO: GET ${PYTHON_URL}/health
-  return {
-    available: false,
-    message: 'Python recommender not configured yet',
-  };
+  return checkDeepRankerHealth();
 };
 
 module.exports = {

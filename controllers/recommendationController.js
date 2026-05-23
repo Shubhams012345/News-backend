@@ -14,6 +14,7 @@ const {
   getRankedRecommendationsForUser,
 } = require('../utils/loadRecommendations');
 const { buildCategoryFallbackFromUser } = require('../utils/recommendationFallback');
+const { rankCandidatesWithDeepLearning } = require('../utils/deepRanker');
 
 const DEFAULT_LIMIT = 20;
 const MIN_LIMIT = 1;
@@ -37,19 +38,35 @@ const getRecommendations = async (req, res) => {
   const userId = req.user._id;
 
   const { rows, fileMissing } = await loadRecommendationRows();
-  const ranked = getRankedRecommendationsForUser(rows, userId, { limit });
+  const candidates = getRankedRecommendationsForUser(rows, userId, { limit });
 
-  if (ranked.length > 0) {
+  if (candidates.length > 0) {
+    const { ranked, ranker, rankerMessage } = await rankCandidatesWithDeepLearning(
+      candidates,
+      req.user,
+      { limit }
+    );
+
+    const message =
+      ranker === 'deep_learning'
+        ? 'Recommendations ranked by deep learning model'
+        : rankerMessage ||
+          'Recommendations loaded from News-Recom export (batch ordering)';
+
     return res.status(200).json({
       success: true,
-      message: 'Recommendations loaded from News-Recom export',
+      message,
       data: {
         source: 'news_recom_csv',
+        ranker,
+        ...(rankerMessage && { rankerMessage }),
         count: ranked.length,
-        recommendations: ranked.map((r) => ({
+        recommendations: ranked.map((r, index) => ({
           articleId: r.item_id,
           itemId: r.item_id,
           score: r.score,
+          ...(r.mlScore != null && { mlScore: r.mlScore }),
+          rank: index + 1,
         })),
       },
     });

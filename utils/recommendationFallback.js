@@ -95,5 +95,6 @@ for (const h of user.readingHistory || []) {
 }
 
 module.exports = {
+  getCurrentTimeContext,
   buildCategoryFallbackFromUser,
 }
